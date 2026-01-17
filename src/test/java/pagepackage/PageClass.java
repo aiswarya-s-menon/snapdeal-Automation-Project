@@ -2,6 +2,8 @@ package pagepackage;
 
 import java.io.File;
 import java.time.Duration;
+import java.util.List;
+
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.io.FileHandler;
@@ -28,17 +30,17 @@ public class PageClass {
     @FindBy(xpath = "//button[normalize-space()='CONTINUE']")
     WebElement continueBtn1;
     
-    @FindBy(xpath = "//input[@placeholder='Enter Mobile Number']")
+    @FindBy(xpath = "//input[@placeholder='Mobile Number']")
      WebElement mobileField;
     
     
-    @FindBy(id="userName")
+    @FindBy(xpath = "//input[@placeholder='Name']")
     WebElement nameField;
 
-    @FindBy(id="userDob")
-    WebElement dobField;
+   // @FindBy(xpath = "//span[normalize-space()='DD/MM/YYYY']")
+   // WebElement dobField;
 
-    @FindBy(id="userPassword")
+    @FindBy(xpath = "//input[@placeholder='Password']")
     WebElement passwordField;
 
    // @FindBy(id="keepLoggedIn")
@@ -144,40 +146,92 @@ public class PageClass {
     
    
 
-    
-    public void loginWithNewUIAutoSubmit(String mobile, String name, String dob, String password) {
+    public void enterMobile(String mobile) {
+        wait.until(ExpectedConditions.visibilityOf(mobileField));
+        mobileField.clear();
+        mobileField.sendKeys(mobile);
+    }
+    public void enterName(String name) {
+        wait.until(ExpectedConditions.visibilityOf(nameField));
+        nameField.clear();
+        nameField.sendKeys(name);
+    }
+
+    public void selectDOBFromExcel(String dob) throws InterruptedException {
+
+        // 1️⃣ Split DOB from Excel
+        String[] parts = dob.split("/");
+        String day = parts[0];        
+        int month = Integer.parseInt(parts[1]); 
+        int year = Integer.parseInt(parts[2]);  
+
+        // 2️⃣ Convert month number to month name
+        String[] months = {"January","February","March","April","May","June",
+                           "July","August","September","October","November","December"};
+        String monthName = months[month - 1]; 
+        String targetHeader = monthName + " " + year; 
 
         JavascriptExecutor js = (JavascriptExecutor) driver;
 
-        // MOBILE
-        By mobileBy = By.xpath("//input[contains(@placeholder,'Mobile')]");
-        WebElement mobileEl = wait.until(ExpectedConditions.presenceOfElementLocated(mobileBy));
-        js.executeScript("arguments[0].scrollIntoView(true);", mobileEl);
-        mobileEl.sendKeys(mobile);
+        // 3️⃣ Click DOB div to open calendar
+        driver.findElement(By.xpath("//span[normalize-space()='DD/MM/YYYY']/ancestor::div[1]")).click();
+        Thread.sleep(500);
 
-        // NAME
-        WebElement nameEl = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("userName")));
-        nameEl.sendKeys(name);
+        // 4️⃣ Loop and click back arrow until correct month/year appears
+        int safetyCounter = 0;
+        while (safetyCounter < 500) {
 
-        // DOB
-        WebElement dobEl = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("userDob")));
-        dobEl.sendKeys(dob);
+            // Get current header
+            String currentHeader = driver.findElement(
+                    By.xpath("//div[contains(@class,'datepicker')]//button[contains(@class,'header')]"))
+                    .getText().trim();
 
-        // PASSWORD
-        WebElement pwdEl = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("userPassword")));
-        pwdEl.sendKeys(password);
+            if (currentHeader.equalsIgnoreCase(targetHeader)) {
+                break; // Stop when target month/year is visible
+            }
+
+            // Click back arrow directly using driver.findElement
+            js.executeScript("arguments[0].click();", 
+                driver.findElement(By.xpath("//div[contains(@class,'datepicker')]//button[normalize-space()='«']"))
+            );
+
+            Thread.sleep(200);
+            safetyCounter++;
+        }
+
+        // 5️⃣ Select the day
+        List<WebElement> days = driver.findElements(
+            By.xpath("//div[contains(@class,'datepicker')]//div[normalize-space()='" + day + "']")
+        );
+        for (WebElement d : days) {
+            if (d.getText().equals(day)) {
+                js.executeScript("arguments[0].click();", d);
+                break;
+            }
+        }
+
+        System.out.println("DOB selected successfully from Excel: " + dob);
     }
+
+
+
+    public void enterPassword(String password) {
+        wait.until(ExpectedConditions.visibilityOf(passwordField));
+        passwordField.clear();
+        passwordField.sendKeys(password);
+    }
+
 
   //  public void enterOtp(String otp) {
     //    wait.until(ExpectedConditions.visibilityOf(otpInputField));
       //  emailField.clear();
        // emailField.sendKeys(otp);
     //}
-   //  public void contnw() {
-     //   wait.until(ExpectedConditions.elementToBeClickable(continueBtn));
-       // continueBtn.click();
-   // }
-
+    public void contnuee() {
+       wait.until(ExpectedConditions.elementToBeClickable(continueBtn));
+        continueBtn.click();
+    }
+   
     public void closeLoginPopup() {
         wait.until(ExpectedConditions.elementToBeClickable(closeLoginPopup));
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", closeLoginPopup);
