@@ -157,62 +157,49 @@ public class PageClass {
         nameField.sendKeys(name);
     }
 
-    public void selectDOBFromExcel(String dob) throws InterruptedException {
+     public void selectDOB() throws InterruptedException {
 
-        // 1️⃣ Split DOB from Excel
-        String[] parts = dob.split("/");
-        String day = parts[0];        
-        int month = Integer.parseInt(parts[1]); 
-        int year = Integer.parseInt(parts[2]);  
+        driver.findElement(
+            By.xpath("//span[normalize-space()='DD/MM/YYYY']/ancestor::div[1]")
+        ).click();
 
-        // 2️⃣ Convert month number to month name
-        String[] months = {"January","February","March","April","May","June",
-                           "July","August","September","October","November","December"};
-        String monthName = months[month - 1]; 
-        String targetHeader = monthName + " " + year; 
+        selectDate("October 2005", "3");
+    }
 
-        JavascriptExecutor js = (JavascriptExecutor) driver;
+    // Core logic
+    public void selectDate(String expmonth, String expdate) throws InterruptedException {
 
-        // 3️⃣ Click DOB div to open calendar
-        driver.findElement(By.xpath("//span[normalize-space()='DD/MM/YYYY']/ancestor::div[1]")).click();
-        Thread.sleep(500);
+        int safety = 0;
+       
+        while (safety < 230) {
+         //  Thread.sleep(1000);
+            // CORRECT header XPath
+            String month = driver.findElement(
+                By.xpath("//button[normalize-space()='«']/following-sibling::button[1]")
+            ).getText().replaceAll("\\s+", " ").trim();
 
-        // 4️⃣ Loop and click back arrow until correct month/year appears
-        int safetyCounter = 0;
-        while (safetyCounter < 500) {
+            System.out.println("Month = [" + month + "]");
 
-            // Get current header
-            String currentHeader = driver.findElement(
-                    By.xpath("//div[contains(@class,'datepicker')]//button[contains(@class,'header')]"))
-                    .getText().trim();
-
-            if (currentHeader.equalsIgnoreCase(targetHeader)) {
-                break; // Stop when target month/year is visible
+            if (month.equalsIgnoreCase(expmonth)) {
+                break; //  stops exactly at November 2006
             }
+           
+            driver.findElement(By.xpath("//button[normalize-space()='«']")).click();
+            safety++;
+        }  
 
-            // Click back arrow directly using driver.findElement
-            js.executeScript("arguments[0].click();", 
-                driver.findElement(By.xpath("//div[contains(@class,'datepicker')]//button[normalize-space()='«']"))
-            );
-
-            Thread.sleep(200);
-            safetyCounter++;
-        }
-
-        // 5️⃣ Select the day
-        List<WebElement> days = driver.findElements(
-            By.xpath("//div[contains(@class,'datepicker')]//div[normalize-space()='" + day + "']")
+        // Select day ONLY from visible calendar
+        List<WebElement> dates = driver.findElements(
+            By.xpath("//div[normalize-space()='" + expdate + "' and not(contains(@style,'display: none'))]")
         );
-        for (WebElement d : days) {
-            if (d.getText().equals(day)) {
-                js.executeScript("arguments[0].click();", d);
+
+        for (WebElement d : dates) {
+            if (d.isDisplayed()) {
+                d.click(); //clicks 3 in November 2006
                 break;
             }
         }
-
-        System.out.println("DOB selected successfully from Excel: " + dob);
     }
-
 
 
     public void enterPassword(String password) {
