@@ -39,23 +39,23 @@ public class TestClass extends BaseClass {
 
             p1.openLoginPopup();
             p1.clickRedLoginButton();
-            Thread.sleep(2000);
+            Thread.sleep(500);
             p1.enterEmail(email);
-            Thread.sleep(3000);
+            Thread.sleep(500);
             p1.contnue();
-            Thread.sleep(3000);
+            Thread.sleep(500);
             p1.enterMobile(mobile);
-            Thread.sleep(3000);
+            Thread.sleep(500);
             p1.enterName(name);
-            Thread.sleep(5000);
-            p1.selectDOBFromExcel(dob);
+            Thread.sleep(500);
+            p1.selectDOB();
 
-            Thread.sleep(3000);
+            Thread.sleep(500);
             p1.enterPassword(password);
-            Thread.sleep(3000);
+            Thread.sleep(500);
 
             p1.contnuee(); 
-            Thread.sleep(3000);               // Continue after new UI login
+            Thread.sleep(500);               // Continue after new UI login
             p1.closeLoginPopup();           // Close login popup
 
             /* ================= SEARCH & FILTER ================= */
