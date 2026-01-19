@@ -29,13 +29,11 @@ public class TestClass extends BaseClass {
             System.out.println("Mobile-------- " + mobile);
             String name = ExcelUtilities.getCellValue(xl, sheet, i, 2);
             System.out.println("Name---------- " + name);
-            String dob = ExcelUtilities.getCellValue(xl, sheet, i, 3);
-            System.out.println("DOB----------- " + dob);
-            String password = ExcelUtilities.getCellValue(xl, sheet, i, 4);
+            String password = ExcelUtilities.getCellValue(xl, sheet, i, 3);
             System.out.println("Password-------- " + password);
 
            
-            /* ================= LOGIN ================= */
+           //LOGIN
 
             p1.openLoginPopup();
             p1.clickRedLoginButton();
@@ -58,7 +56,7 @@ public class TestClass extends BaseClass {
             Thread.sleep(500);               // Continue after new UI login
             p1.closeLoginPopup();           // Close login popup
 
-            /* ================= SEARCH & FILTER ================= */
+            //SEARCH & FILTER 
             p1.searchProduct("Sandals for Women");
             p1.applyBlackFilter();
             p1.setPriceRange("106", "1000");
